@@ -89,6 +89,7 @@ func imprimeTabuleiroEGabarito() {
 	}
 }
 
+// Verifica se o valor inserido é um int ou um numero valido
 func movimentoHumano() {
 	leitor := bufio.NewReader(os.Stdin)
 	var movimento int
@@ -119,7 +120,6 @@ func movimentoHumano() {
 	}
 }
 
-// parte muito cabulosa e abstrata
 func movimentoComputador() {
 	_, movimento := minimax(tabuleiro, 0, true)
 	if movimento != [2]int{-1, -1} {
@@ -129,12 +129,17 @@ func movimentoComputador() {
 
 // Algoritmo minimax
 func minimax(tabuleiro [tamanho][tamanho]string, profundidade int, maximizar bool) (int, [2]int) {
+	// Verifica se o computador venceu e retorna um valor positivo, quanto menor a profundidade, maior o valor.
 	if verificaFimDoJogo(tabuleiro, computador) {
 		return 10 - profundidade, [2]int{-1, -1}
 	}
+
+	// Verifica se o jogador venceu e retorna um valor negativo, quanto menor a profundidade, menor o valor.
 	if verificaFimDoJogo(tabuleiro, jogador) {
 		return profundidade - 10, [2]int{-1, -1}
 	}
+
+	// Verifica se houve empate, retornando 0.
 	if empate() {
 		return 0, [2]int{-1, -1}
 	}
@@ -142,30 +147,31 @@ func minimax(tabuleiro [tamanho][tamanho]string, profundidade int, maximizar boo
 	var melhorValor int
 	var melhorMovimento [2]int = [2]int{-1, -1}
 
+	// Se for a vez do computador (maximizar)
 	if maximizar {
-		melhorValor = -1000
-		for linha := 0; linha < tamanho; linha++ {
-			for coluna := 0; coluna < tamanho; coluna++ {
-				if tabuleiro[linha][coluna] == vazio {
-					tabuleiro[linha][coluna] = computador
-					valor, _ := minimax(tabuleiro, profundidade+1, false)
-					tabuleiro[linha][coluna] = vazio
-					if valor > melhorValor {
+		melhorValor = -1000                        // Define o pior valor inicial
+		for linha := 0; linha < tamanho; linha++ { // Itera sobre cada linha do tabuleiro
+			for coluna := 0; coluna < tamanho; coluna++ { // Itera sobre cada coluna do tabuleiro
+				if tabuleiro[linha][coluna] == vazio { // Verifica se a célula está vazia
+					tabuleiro[linha][coluna] = computador                 // Faz um movimento temporário
+					valor, _ := minimax(tabuleiro, profundidade+1, false) // Calcula o valor usando minimax recursivamente
+					tabuleiro[linha][coluna] = vazio                      // Desfaz o movimento
+					if valor > melhorValor {                              // Se o valor atual é melhor, atualiza o melhor valor e movimento
 						melhorValor = valor
 						melhorMovimento = [2]int{linha, coluna}
 					}
 				}
 			}
 		}
-	} else {
-		melhorValor = 1000
+	} else { // Se for a vez do jogador (minimizar)
+		melhorValor = 1000 // Define o pior valor inicial para o jogador
 		for linha := 0; linha < tamanho; linha++ {
 			for coluna := 0; coluna < tamanho; coluna++ {
 				if tabuleiro[linha][coluna] == vazio {
-					tabuleiro[linha][coluna] = jogador
-					valor, _ := minimax(tabuleiro, profundidade+1, true)
-					tabuleiro[linha][coluna] = vazio
-					if valor < melhorValor {
+					tabuleiro[linha][coluna] = jogador                   // Faz um movimento temporário
+					valor, _ := minimax(tabuleiro, profundidade+1, true) // Calcula o valor usando minimax recursivamente
+					tabuleiro[linha][coluna] = vazio                     // Desfaz o movimento
+					if valor < melhorValor {                             // Se o valor atual é melhor, atualiza o melhor valor e movimento
 						melhorValor = valor
 						melhorMovimento = [2]int{linha, coluna}
 					}
@@ -173,8 +179,9 @@ func minimax(tabuleiro [tamanho][tamanho]string, profundidade int, maximizar boo
 			}
 		}
 	}
-	return melhorValor, melhorMovimento
 
+	// Retorna o melhor valor encontrado e o movimento correspondente
+	return melhorValor, melhorMovimento
 }
 
 func verificaFimDoJogo(tabuleiro [tamanho][tamanho]string, jogador string) bool {
